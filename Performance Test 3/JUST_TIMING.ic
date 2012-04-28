@@ -1,0 +1,115 @@
+/*********************************************/
+/* The Magic Conch                           */
+/* Team J-6                                  */
+/* Begin Date: 04/21/2012                    */
+/* Purpose: This program will be used to     */
+/* test motor commands before integration    */
+/*********************************************/
+// Files to include for proper functions
+#use Robot_Global_Constants_REV_1.ic
+#use Motor_Functions_REV_4_GPSFREE.ic
+#use Sensor_Functions_REV_1.ic
+
+float startTime;
+int main()
+{
+    /* Adjusts the shaft encoder reading values */
+    encoder4_high_threshold = 150;
+    encoder2_high_threshold = 150;
+    
+    /* Begin with motors stopped */
+    Motor_Kill();
+    
+    /* Wait */
+    while(!start_button());
+    startTime = seconds();
+    /* Wait for the light to begin run */
+    while( cds_on_off() == OFF && seconds() <= startTime + 3.0 );
+    
+    // Get robot up the hill
+    motor(LEFT_WHEEL, -85);
+    motor(RIGHT_WHEEL, -85);
+    sleep(3.5); 
+    
+    // Stop motor
+    motor(LEFT_WHEEL, MOTOR_OFF);
+    motor(RIGHT_WHEEL, MOTOR_OFF);
+    sleep(0.50);
+    
+    // Turn robot
+    motor(LEFT_WHEEL, 90);
+    motor(RIGHT_WHEEL, -90);
+    sleep(0.43);
+    
+    // Stop motor
+    motor(LEFT_WHEEL, MOTOR_OFF);
+    motor(RIGHT_WHEEL, MOTOR_OFF);
+    sleep(0.50);
+    
+    // Have robot go to crank
+    motor(LEFT_WHEEL, -40);
+    motor(RIGHT_WHEEL, -40);
+    sleep(2.3);
+    
+    // Stop motor
+    motor(LEFT_WHEEL, MOTOR_OFF);
+    motor(RIGHT_WHEEL, MOTOR_OFF);
+    sleep(0.50);
+    
+    // Send motor toward the subway
+    motor(LEFT_WHEEL, 50);
+    motor(RIGHT_WHEEL, 50);
+    sleep(2.3);
+    
+    // Turn robot for correction
+    motor(LEFT_WHEEL, -90);
+    motor(RIGHT_WHEEL, 90);
+    sleep(0.10);
+    
+    // Stop motor
+    motor(LEFT_WHEEL, MOTOR_OFF);
+    motor(RIGHT_WHEEL, MOTOR_OFF);
+    sleep(0.50);
+    // Stop motor functions
+    motor(LEFT_WHEEL, MOTOR_OFF);
+    motor(RIGHT_WHEEL, MOTOR_OFF);
+    sleep(0.50);
+    
+    // Send motor toward the subway
+    motor(LEFT_WHEEL, 50);
+    motor(RIGHT_WHEEL, 50);
+    sleep(2.5);
+    
+    // Stop motor functions
+    motor(LEFT_WHEEL, MOTOR_OFF);
+    motor(RIGHT_WHEEL, MOTOR_OFF);
+    sleep(0.50); 
+    
+    while( 1 == 1 ) {
+        // Send motor toward the subway
+        motor(LEFT_WHEEL, 50);
+        motor(RIGHT_WHEEL, 50);
+        sleep(0.5);
+        motor(LEFT_WHEEL, MOTOR_OFF);
+        motor(RIGHT_WHEEL, MOTOR_OFF);
+        sleep(0.20);
+        motor(LEFT_WHEEL, -50);
+        motor(RIGHT_WHEEL, -35);
+        sleep(0.5);
+        // Send motor toward the subway
+        motor(LEFT_WHEEL, 50);
+        motor(RIGHT_WHEEL, 50);
+        sleep(0.5);
+        motor(LEFT_WHEEL, MOTOR_OFF);
+        motor(RIGHT_WHEEL, MOTOR_OFF);
+        sleep(0.20);
+        motor(LEFT_WHEEL, -35);
+        motor(RIGHT_WHEEL, -50);
+        sleep(0.5);
+    }
+    
+    /* Print final gps values to screen */
+    while(!gps_get_data());
+    printf("X: %d Y: %d H: %d  L:%d  R:%d\n", gps_x, gps_y, gps_heading, encoder4_counts, encoder2_counts);
+    sleep(2.0);
+}

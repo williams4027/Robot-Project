@@ -1,0 +1,29 @@
+/*********************************************/
+/* The Magic Conch                           */
+/* Team J-6                                  */
+/* Begin Date: 04/21/2012                    */
+/* Purpose: This program will be used to     */
+/* develop motor commands for integration    */
+/*********************************************/
+// Files to include for proper functions
+#use gps_module.icb
+#use gps_module.ic
+
+int GPS_Read_Values ()
+{
+    /* Enable GPS */
+    gps_enable();
+    
+    /* Initialize the region of course using knob */
+    gps_initialize_knob();
+   
+    /* Test GPS Values */
+    while ( !stop_button() ) {
+        while( !gps_get_data() );
+        printf("X: %d Y: %d H: %d\n", gps_x, gps_y, gps_heading);
+        sleep(0.75);
+    }
+    
+    /* Disable GPS */
+    gps_disable();
+}

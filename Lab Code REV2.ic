@@ -1,0 +1,78 @@
+/* Team Members: Kelsey Dahman, Daniel Marchese   */
+/*               Ethan Weisgarber, Blake Williams */
+/* Date: 04/11/2012                               */
+/* Project: GPS and Servo Lab - GPS               */
+/* Instructor: BCM                                */
+#use exp_servo_lib.ic
+#use gps_module.icb
+#use gps_module.ic
+
+#define SERVOPORT 5
+
+int main ()
+{
+    /* Test the servo motor and input calibration values */
+    exp_servo_enable();  // Activate servo motor
+    
+    exp_servo_min[SERVOPORT] = 80;    // Define minimum servo value
+    exp_servo_max[SERVOPORT] = 4050;   // Define maximum servo value
+    
+    /* Enable GPS */
+    gps_enable();
+    
+    /* Initialize the region of course using */
+    gps_initialize_knob();
+    
+    /* Only read new data */
+    while(!stop_button()) {
+        exp_servo_deg(SERVOPORT, 0);
+        gps_get_data();
+        if ( gps_heading 
+        /* Use increment to turn servo forward to 90 degrees */
+        while( gps_heading >= 87 && gps_heading <= 93  ){
+            while ( ( 180 - gps_heading ) >= 1 ) {
+                /* Loop to get the servo within 10 degrees of 90 */
+                while ( ( 180 - gps_heading ) >= 10 ){
+                    //Increment heading by 10
+                    exp_servo_deg(SERVOPORT, gps_heading + 10 );
+                    sleep(1.0);
+                    gps_get_data();
+                }
+                //Increment heading by 1
+                exp_servo_deg(SERVOPORT, gps_heading + 1 );
+                sleep(0.5); 
+                gps_get_data();
+            }
+            
+            printf(gps_heading);
+            
+            /* Use increment to turn servo back to 90 degrees */
+            while ( ( 180 - gps_heading ) <= -1 ) {
+                /* Loop to get the servo within 10 degrees of 90 */
+                while ( ( 180 - gps_heading ) <= -10 ){
+                    //Increment heading by -10
+                    exp_servo_deg(SERVOPORT, gps_heading - 10 );
+                    sleep(1.0);
+                    gps_get_data();
+                }
+                //Increment heading by 1
+                exp_servo_deg(SERVOPORT, gps_heading - 1 );
+                sleep(0.5);
+                gps_get_data();
+            }
+            
+            /* Check to see if additional changing is needed to get 90 */
+            gps_get_data();
+        }
+        
+       // /* While loop to pause until new data is read */
+       // while(!gps_get_data());
+        
+    }
+    
+    /* Disable servo motor */
+    exp_servo_disable();
+    
+    /* Disable GPS */
+    gps_disable();
+}

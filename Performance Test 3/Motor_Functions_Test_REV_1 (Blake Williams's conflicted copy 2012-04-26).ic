@@ -1,0 +1,36 @@
+/*********************************************/
+/* The Magic Conch                           */
+/* Team J-6                                  */
+/* Begin Date: 04/21/2012                    */
+/* Purpose: This program will be used to     */
+/* test motor commands before integration    */
+/*********************************************/
+// Files to include for proper functions
+#use Robot_Global_Constants_REV_1.ic
+#use Motor_Functions_REV_2.ic
+#use Sensor_Functions_REV_1.ic
+
+int main()
+{
+    /* Adjusts the shaft encoder reading values */
+    /*encoder4_high_threshold = 100;*/
+    
+    /* Tell the robot the correct gps values to get */
+    GPS_Initialize();
+    
+    /* Begin with motors stopped */
+    Motor_Kill();
+    
+    /* Wait for the light to begin run */
+    while( cds_on_off() == OFF );
+    
+    /* Move robot forward a small distance */
+    Motor_Straight(BACKWARD, 90, 6, 70, 70, 170, 0);
+    
+    /* Stop the motors and end the run */
+    Motor_Kill();
+    
+    /* Print final gps values to screen */
+    printf("X: %d Y: %d H: %d\n", gps_x, gps_y, gps_heading);    
+    
+}

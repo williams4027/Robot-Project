@@ -1,0 +1,112 @@
+/*********************************************/
+/* The Magic Conch                           */
+/* Team J-6                                  */
+/* Begin Date: 04/21/2012                    */
+/* Purpose: This program will be used to     */
+/* hold sensor functions                     */
+/*********************************************/
+// Files to include for proper functions
+#use gps_module.icb
+#use gps_module.ic
+
+//Definitions for motor ports and motor speeds
+#define LEFT_WHEEL 3
+#define RIGHT_WHEEL 1
+#define MOTOR_POWER_FULL 100
+#define MOTOR_POWER_CRUISE 75
+#define MOTOR_POWER_HALF 50
+#define MOTOR_POWER_QUARTER 25
+#define MOTOR_OFF 0
+#define GPS_ERROR 2
+#define BUMP_PORT 1
+#define ON 1
+#define OFF 0
+#define RED 1
+#define BLUE 2
+#define CDSPORT 6
+
+/* Function to initialize the gps settings */
+int GPS_Initialize()
+{
+    /* Enable GPS */
+    gps_enable();
+    
+    /* Initialize the region of course using knob */
+    gps_initialize_knob();
+    
+}
+
+void GPS_Test()
+{
+    /* Test GPS Values */
+    while ( !stop_button() ) {
+        while( !gps_get_data() );
+        printf("X: %d Y: %d H: %d\n", gps_x, gps_y, gps_heading);
+        sleep(0.75);
+    }
+}
+
+//Bump switch, returns one if bump switch was pressed during the
+//program cylce
+int bump_switch () {
+    if (digital(BUMP_PORT) == 1) {
+        printf ("BUMP SWITCH TRIPPED\n");
+        return ON;
+    }
+    
+    else if (digital(BUMP_PORT) == 0) {
+        printf ("NO BUMP DETECTED\n");
+        return OFF;
+    }
+    
+    else {
+        printf ("ERROR!\n");
+        return OFF;
+    }
+}
+
+int cds_color_reading () {
+    /* Define variables */
+    int cds_reading = 0;
+    
+    /* Stall handyboard until start button is pressed */
+    while(!start_button());
+    
+    /* Use while statement to print the values read */
+    while( !stop_button() ){
+        
+        /* Save analog reading to variable cdsreading */
+        cds_reading = analog(CDSPORT);        
+        
+        /* Selection case to determine lights using green filter */
+        if ( cds_reading >= 0 && cds_reading <= 15 ){
+            printf("RED LIGHT\n", cds_reading);
+            return RED;
+        }
+        else if ( cds_reading > 15 && cds_reading <= 180 ){
+            printf("BLUE LIGHT %d\n", cds_reading);
+            return BLUE;
+        }
+        else if ( cds_reading > 180 && cds_reading <= 255 ){
+            printf("NO LIGHT %d\n", cds_reading);
+            return OFF;
+        }
+    }    
+}
+
+int cds_on_off () {
+    if (analog(CDSPORT) < 60) {
+        printf ("LIGHT ON\n");
+        return ON;
+    }
+    
+    else {
+        printf ("LIGHT OFF\n");
+        return OFF;
+    }
+}
+
+void CdS_Test() {
+    /* Simply print the cds reading to screen */
+    printf("%d\n", analog(CDSPORT) );
+}

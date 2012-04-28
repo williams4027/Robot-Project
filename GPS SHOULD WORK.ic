@@ -1,0 +1,97 @@
+/* Team Members: Kelsey Dahman, Daniel Marchese   */
+/*               Ethan Weisgarber, Blake Williams */
+/* Date: 04/11/2012                               */
+/* Project: GPS and Servo Lab - GPS               */
+/* Instructor: BCM                                */
+
+#use exp_servo_lib.ic
+#use gps_module.icb
+#use gps_module.ic
+#define SERVOPORT 5
+
+int main ()
+{
+    int counter = 0;      // Initialize variable for failsafe
+    int servo_motor = 0;  // Initialize motor angle to 0
+    
+    exp_servo_enable();   // Activate servo motor
+    
+    exp_servo_min[SERVOPORT] = 500;    // Define minimum servo value
+    exp_servo_max[SERVOPORT] = 4050;   // Define maximum servo value   
+    
+    /* Enable GPS */
+    gps_enable();
+    
+    /* Initialize the region of course using knob */
+    gps_initialize_knob();
+    
+    /* Set servo to known position and give time */
+    exp_servo_deg(SERVOPORT, servo_motor);
+    sleep(1.0);
+    
+    /* Continue to loop until stop button is pressed */
+    while(!stop_button()) {
+        
+        /* Wait for the new gps reading and print display */
+        while(!gps_get_data());
+        printf("OUTSIDE GPS: %d SERVO: %d\n", gps_heading, servo_motor);
+        sleep(0.5);
+        
+        /* Run loop until the 90 degree reading is taken */
+        while ( !(gps_heading >= 88 && gps_heading <= 92 ) || counter == 10 ) {
+            
+            
+            /* If gps is less than 55, add increment and retest reading */
+            if( gps_heading < 80 ) {
+                servo_motor += 10;
+            }
+            else if ( gps_heading < 90 ) {
+                servo_motor++;
+            }
+            /* If gps is greater than 95, subtract increment and retest reading */
+            else if ( gps_heading > 100 ) {
+                servo_motor -= 10;
+            }
+            else if ( gps_heading > 90 ) {
+                servo_motor--;
+            }
+            
+            /* Change servo motor degree to make sure values are valid */
+            if ( servo_motor > 180 ) {
+                servo_motor = servo_motor - 180;
+            }
+            else if ( servo_motor < 0 ) {
+                servo_motor = servo_motor + 180;
+            }
+            
+            /* Move servo to desired movement */
+            exp_servo_deg(SERVOPORT, servo_motor );
+            sleep(0.2);
+            
+            /* Check gps */
+            while(!gps_get_data());
+            
+            /* Increment counter so code can break out if unsuccessful */
+            counter++;
+        }
+        
+        /* Check whether the failsafe activated or heading was found */
+        if ( gps_heading <= 92 && gps_heading >= 88 ) {
+            printf("90 Deg Found\n");
+        }
+        else if ( counter == 10 ) {
+            printf("Failsafe Reached\n");
+        }
+        sleep(1.0);
+        
+        /* Reset counter and restart tests0 */
+        counter = 0;
+    }
+    
+    /* Disable servo motor */
+    exp_servo_disable();
+    
+    
+    /* Disable GPS */
+    gps_disable();
+}

@@ -1,0 +1,84 @@
+/*********************/
+/* Turning functions */
+/* for pseudo code   */
+/*********************/
+
+void Turn_45_Degrees(CW or CCW) {
+	while (current_heading isn't in desired range) {
+		if (turning CW) {
+			Left Wheel Forward;
+			Right Wheel Backward;
+		}
+		
+		if (turning CCW) {
+			Right Wheel Forward;
+			Left Wheel Backward;
+		}
+	}
+	
+	while (current heading isn't in narrowed range) {
+		if (current is left of desired) {
+			Right Wheel Backward;
+			Left Wheel Forward;
+		}
+		
+		if (current is right of desired) {
+			Right Wheel Forward;
+			Left Wheel Backward;
+		}
+	}
+}
+
+
+void Turn_90_Degrees(CW or CCW) {
+	while (current_heading isn't in desired range) {
+		if (turning CW) {
+			Left Wheel Forward;
+			Right Wheel Backward;
+		}
+		
+		if (turning CCW) {
+			Right Wheel Forward;
+			Left Wheel Backward;
+		}
+	}
+	
+	while (current heading isn't in narrowed range) {
+		if (current is left of desired) {
+			Right Wheel Backward;
+			Left Wheel Forward;
+		}
+		
+		if (current is right of desired) {
+			Right Wheel Forward;
+			Left Wheel Backward;
+		}
+	}
+}
+
+
+void Turn_180_Degrees(CW or CCW) {
+	while (current_heading isn't in desired range) {
+		if (turning CW) {
+			Left Wheel Forward;
+			Right Wheel Backward;
+		}
+		
+		if (turning CCW) {
+			Right Wheel Forward;
+			Left Wheel Backward;
+		}
+	}
+	
+	while (current heading isn't in narrowed range) {
+		if (current is left of desired) {
+			Right Wheel Backward;
+			Left Wheel Forward;
+		}
+		
+		if (current is right of desired) {
+			Right Wheel Forward;
+			Left Wheel Backward;
+		}
+	}
+}

@@ -1,0 +1,31 @@
+/*****************************/
+/* Dumpster Sub-Function for */
+/* Pseudo Code               */
+/*****************************/
+
+int LED_Color () {
+	Turn_45_Degrees_Function (CW);
+	Drive_Straight_Function (Distance, gpsx, gpsy);
+	Turn_90_Degrees_Function (CW);
+	Drive_Straight_Function (Distance, gpsx, gpsy);
+	Turn_90_Degrees_Function (CCW);
+	Drive_Straight_Function (Distance, gpsx, gpsy);
+	
+	while (1) {
+		Reading1 = CdS_Color;
+		sleep (0.5);
+		Reading2 = CdS_Color;
+		
+		if (Reading1 == Reading2) {
+			if (Reading is Red) {
+				return RED;
+			}
+			
+			else {
+				return BLUE;
+			}
+		}
+		
+		else {}
+	}
+}

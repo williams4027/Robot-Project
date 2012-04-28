@@ -1,0 +1,32 @@
+/*********************************************/
+/* The Magic Conch                           */
+/* Team J-6                                  */
+/* Begin Date: 04/23/2012                    */
+/* Purpose: This program will be used to     */
+/* hold all defined constants for functions  */
+/*********************************************/
+// Universal Constants
+#define ON 1
+#define OFF 0
+
+//Definitions for motor ports and motor speeds
+#define LEFT_WHEEL 3
+#define RIGHT_WHEEL 1
+#define MOTOR_POWER_FULL 100
+#define MOTOR_POWER_CRUISE 75
+#define MOTOR_POWER_HALF 50
+#define MOTOR_POWER_QUARTER 25
+#define TURN_CCW -1
+#define TURN_CW 1
+#define FORWARD 1
+#define BACKWARD 0
+#define MOTOR_OFF 0
+#define GPS_ERROR 2
+#define SUCCESS 1
+#define FAILURE 0
+
+//Definitions for sensor operations
+#define BUMP_PORT 1
+#define RED 1
+#define BLUE 2
+#define CDSPORT 6

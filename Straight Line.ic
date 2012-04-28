@@ -1,0 +1,20 @@
+/*******************************/
+/* The Magic Conch             */
+/* Team J-6                    */
+/* Begin Date: 04/17/2012      */
+/* Purpose: Run the robot in a */
+/* straight line               */
+/*******************************/
+
+#use gps_module.icb
+#use gps_module.ic
+#define DIRECTION 90
+#define LEFT_WHEEL 1
+#define RIGHT_WHEEL 2
+#define MOTOR_FORWARD 70
+
+int main ()
+{
+    
+    
+    

@@ -1,0 +1,17 @@
+/*********************************************/
+/* The Magic Conch                           */
+/* Team J-6                                  */
+/* Begin Date: 04/21/2012                    */
+/* Purpose: This program will be used to     */
+/* test motor commands before integration    */
+/*********************************************/
+#use Motor_Functions_REV_1.ic
+#use gps_module.icb
+#use gps_module.ic
+
+int main ()
+{
+    
+    
+    
+}

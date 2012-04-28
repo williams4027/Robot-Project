@@ -1,0 +1,55 @@
+/*********************************************/
+/* The Magic Conch                           */
+/* Team J-6                                  */
+/* Begin Date: 04/21/2012                    */
+/* Purpose: This program will be used to     */
+/* test motor commands before integration    */
+/*********************************************/
+// Files to include for proper functions
+#use Robot_Global_Constants_REV_1.ic
+#use Motor_Functions_REV_2.ic
+#use Sensor_Functions_REV_1.ic
+
+int main()
+{
+    /* Adjusts the shaft encoder reading values */
+    encoder4_high_threshold = 150;
+    encoder2_high_threshold = 150;
+    
+    /* Tell the robot the correct gps values to get */
+    GPS_Initialize();
+    //GPS_Test();
+    
+    /* Begin with motors stopped */
+    Motor_Kill();
+    
+    /* Wait for the light to begin run */
+    while( cds_on_off() == OFF );
+    
+    /* Move robot forward a small distance */
+    Motor_Straight(BACKWARD, 34, 90, 70, 70, 0, 170 );
+    
+    if ( gps_y > 170 ){
+        motor(LEFT_WHEEL, -10);
+        motor(RIGHT_WHEEL, -10);
+        while(!gps_get_data());
+    }
+    
+    /* Turn robot to the right (Backwards forward) */
+    Robot_Turn( TURN_CCW );
+    
+    /* Move robot forward a small distance */
+    Motor_Straight(BACKWARD, 23, 0, 70, 70, -105, 0 );
+    
+    /* Move robot forward a small distance */
+    Motor_Straight(FORWARD, 66, 0, 70, 70, -105, 0 );
+    
+    /* Stop the motors and end the run */
+    Motor_Kill();
+    
+    /* Print final gps values to screen */
+    while(!gps_get_data());
+    printf("X: %d Y: %d H: %d  L:%d  R:%d\n", gps_x, gps_y, gps_heading, encoder4_counts, encoder2_counts);
+    sleep(2.0);
+    
+}

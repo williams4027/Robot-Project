@@ -1,0 +1,28 @@
+/*********************************************/
+/* The Magic Conch                           */
+/* Team J-6                                  */
+/* Begin Date: 04/17/2012                    */
+/* End Date:                                 */
+/* Purpose: This program will be used in the */
+/* performance test on Friday 4-20           */
+/*********************************************/
+
+//Definitions for motor ports and motor speeds
+#define LEFT_WHEEL 3
+#define RIGHT_WHEEL 2
+#define MOTOR_POWER 70
+
+int main ()
+{
+    int motor_level = 0;
+    //Turn on both motors and let them run for 6 seconds.
+    while ( motor_level != 100 ) {
+        motor (LEFT_WHEEL, motor_level );
+        //motor (RIGHT_WHEEL, MOTOR_POWER);
+        sleep (3.0);
+        motor (LEFT_WHEEL, 0);
+        //motor (RIGHT_WHEEL, 0);
+        motor_level += 5;
+        printf("MOTOR: %d\n", motor_level);  
+    }
+}

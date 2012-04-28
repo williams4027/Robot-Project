@@ -1,0 +1,23 @@
+/********************/
+/* On Off function  */
+/* for pseudo code  */
+/********************/
+
+int CdS_ON_OFF () {
+	while (1) {
+		Reading1 = CdS_Reading;
+		Reading2 = CdS_Reading;
+		
+		if (Reading1 == Reading2) {
+			if (Reading1 is RED) {
+				return RED;
+			}
+			
+			else {
+				return BLUE;
+			}
+		}
+		
+		else {}
+	}
+}

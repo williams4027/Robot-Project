@@ -1,0 +1,96 @@
+/* Team Members: Kelsey Dahman, Daniel Marchese   */
+/*               Ethan Weisgarber, Blake Williams */
+/* Date: 03/30/2012                               */
+/* Project: Lab Sensor - CdS                      */
+/* Instructor: BCM                                */
+#define CDSPORT 6       // Analog port constant
+#define MICROSWITCH 7   // Digital port constant
+#define MOTORPORT 1     // Motor port constant
+#define CALIBRATION 200 // Number of data points to collect
+
+int calibration (int * base_reading){
+    /* Declare variables for temp values and return range */
+    int signal, counter = 0, range = 0; 
+    int exposedsum = 0, coveredsum = 0, exposedaverage = 0, coveredaverage = 0;
+    
+    /* Get the brightest reading */
+    printf("EXPOSE SENSOR TO LIGHT\n");
+    sleep(5.0); // Sleep to allow prompt display
+    printf("SENSOR COLLECTING\n");
+    /* Loop to collect average values */
+    while( counter < CALIBRATION ){
+        signal = analog(CDSPORT); // Read CdS value
+        exposedsum = exposedsum + signal; // Create running total
+        counter++; // Increment counter
+    }
+    
+    /* Put break between calibration */
+    printf("COVER SENSOR FROM LIGHT\n");
+    sleep(5.0); // Sleep to allow prompt display
+    printf("SENSOR COLLECTING\n");
+    counter = 0; // Reset counter for another data collection
+    
+    /* Get the lowest light reading */
+    while( counter < CALIBRATION ){
+        signal = analog(CDSPORT); // Read CdS value
+        coveredsum = coveredsum + signal; // Create running total
+        counter++; // Increment counter
+    }
+    
+    /* Calculate averages in integers and calculate range */
+    coveredaverage = coveredsum / CALIBRATION;
+    exposedaverage = exposedsum / CALIBRATION;
+    range = exposedaverage - coveredaverage; 
+    
+    /* Return range and assign covered average as the lowest reading possible */
+    *base_reading = exposedaverage;
+    return range;
+}
+
+
+int main (){
+    /* Define variables */
+    int cds_reading = 0, base_reading = 0, range = 0;
+    
+    /* Stall handyboard until start button is pressed */
+    while(!start_button());
+    
+    /* Run calibration to find how sensor readings will increment */
+    range = calibration(&base_reading);
+    
+    /* Tell that motor operations will commence */
+    printf("MOTOR OPERATIONS WILL BEGIN\n");
+    sleep(5.0);
+    
+    /* Loop while stop button and microswitch are deactivated */
+    while( !stop_button() && digital(MICROSWITCH) != 0 ){
+        
+        /* Save analog reading to variable cdsreading */
+        cds_reading = analog(CDSPORT);        
+        
+        /* Use selection to print the change motor speed based on CDS reading */
+        if ( cds_reading >= base_reading && cds_reading < base_reading + range / 2 ){
+            motor(MOTORPORT, 100 - 100 * ( cds_reading / ( range / 2 ) ) );
+            printf( "MOTOR POSITIVE %d\n", 100 - 100 * ( 2 * cds_reading ) / range );
+        }
+        else if ( cds_reading == base_reading + range / 2 ){
+            motor(MOTORPORT, 0);
+            printf( "MOTOR OFF\n" );
+        }
+        else if ( cds_reading > base_reading + range / 2 && cds_reading < range + base_reading ){
+            motor(MOTORPORT, -100 * ( 2 * cds_reading - range ) / range );
+            printf( "MOTOR NEGATIVE %d\n", -100 * ( 2 * cds_reading - range ) / range );
+        }
+        else {
+            /* Print error message for bad reading */
+            printf( "READING OUTSIDE AVERAGE RANGE\n");
+        }
+        
+        /* Sleep timer to see reading values */
+        sleep(1.0);
+    }    
+    
+    /* Exit program and turn off motor */
+    motor(MOTORPORT, 0);
+    printf("MOTOR OFF\n");
+}

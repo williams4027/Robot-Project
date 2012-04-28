@@ -1,0 +1,203 @@
+/*********************************************/
+/* The Magic Conch                           */
+/* Team J-6                                  */
+/* Begin Date: 04/26/2012                    */
+/* Purpose: This program will be used to     */
+/* develop motor commands for integration    */
+/*********************************************/
+//Libraries to be used
+#use sencdr4.icb
+#use sencdr2.icb
+#use Robot_Global_Constants_REV_1.ic
+#use Sensor_Functions_REV_1.ic
+#use gps_module.icb
+#use gps_module.ic
+
+/* Function will turn off the drive train motors */
+int Motor_Kill()
+{
+    /* Print message to signal command start */ 
+    printf("Motor_Kill Started\n");
+    
+    /* Turn off motors */
+    motor(LEFT_WHEEL, MOTOR_OFF);
+    motor(RIGHT_WHEEL, MOTOR_OFF);
+    
+    /* Return 1 if successful */
+    beep();
+    beep();
+    return SUCCESS;
+    
+}
+
+/* Function will move robot in a straight line */
+/* Check shaft encoder values to update motor power */
+int resumeMotor = ON;
+
+int Motor_Straight( int motorDirection, int totalDistance, int finalHeading, int motorLevelL, int motorLevelR, int finalDestinationX, int finalDestinationY )
+{
+    /* Kill motor to initialize process */
+    Motor_Kill();
+    
+    /* Reset encoder values */
+    encoder4_counts = 0;
+    encoder2_counts = 0;
+    
+    /* Print message to signal command start */
+    printf("Motor_Straight Started\n");
+    
+    /* Use selection statement to choose motor direction */
+    if ( motorDirection == FORWARD ) {
+        // Start motor functions
+        motor(LEFT_WHEEL, motorLevelL);
+        motor(RIGHT_WHEEL, motorLevelR);
+    }
+    else if ( motorDirection == BACKWARD ) {
+        // Start motor functions
+        motor(LEFT_WHEEL, -motorLevelL);
+        motor(RIGHT_WHEEL, -motorLevelR);
+    }
+    
+    /* Initialize operations to prepare for gps */
+    resumeMotor = ON;
+    
+    /* Monitor motor function by assessing shaft encoder and heading */
+    while( resumeMotor == ON && !stop_button()) {
+        printf("L:%d   MLL:%d   R:%d  MLR:%d\n", encoder4_counts, motorLevelL, encoder2_counts, motorLevelR);
+        // Check shaft encoder to make sure robot has not arrived at destination 
+        if ( ( encoder4_counts > (totalDistance * 7 ) / 4 ) || ( encoder2_counts > (totalDistance * 7 ) / 4) ) {
+            /* Update gps to check where the robot is at */
+            while( !gps_get_data() );
+            if ( finalDestinationY == 0 ) {
+                if ( gps_x + 10 >= finalDestinationX && gps_x - 10 <= finalDestinationX ) {
+                    // Change motor resume for reaching objective 
+                    resumeMotor = OFF;
+                }
+            }
+            else if ( finalDestinationX == 0 ) {
+                if ( gps_y + 10 >= finalDestinationY && gps_y - 10 <= finalDestinationY ) {
+                    // Change motor resume for reaching objective
+                    resumeMotor = OFF;
+                }
+            }
+        }
+        
+        /* Check gps to make sure robot is heading at correct angle */
+    }
+    /* Kill motor, because it looks like we've got a SITUATION! */
+    Motor_Kill();
+    
+    /* Return value of test */
+    return SUCCESS;
+}
+
+/* Function will turn robot 90 degrees in a passed direction */
+// Variables to be used in Robot_Turn function
+int finalHeading = -1; 
+int continueTurn = ON; 
+
+int Robot_Turn(int rotationDirection )
+{   
+    /* Ensure that motors are killed before starting */
+    Motor_Kill();
+    
+    /* Reset encoder values */
+    encoder4_counts = 0;
+    encoder2_counts = 0;
+    
+    /* Print message to signal command start */
+    printf("Robot_Turn Started\n");
+    
+    /* Get new gps data variables */
+    while ( !gps_get_data() );
+    
+    /* Selection case to discover if final heading
+       value needs to be adjusted for being out of bounds */
+    if ( gps_heading < 45 || gps_heading > 135 ) {
+        // Set to a heading of 90
+        finalHeading = 90;
+    }
+    else {
+        finalHeading = 0;
+    }
+    
+    /* Use rotation direction to pick motor settings */
+    if ( rotationDirection == TURN_CCW ) {
+        /* Start motor functions at quarter power */
+        motor(LEFT_WHEEL, -MOTOR_POWER_QUARTER +10);
+        motor(RIGHT_WHEEL, MOTOR_POWER_QUARTER -10);
+    }
+    else if ( rotationDirection == TURN_CW ) {
+        /* Start motor functions at quarter power */
+        motor(LEFT_WHEEL, MOTOR_POWER_QUARTER -10);
+        motor(RIGHT_WHEEL, -MOTOR_POWER_QUARTER +10);
+    }
+    else
+    {
+        /* Error occured, direction not specified */
+        beep();
+        return FAILURE;
+    }
+    
+    /* Process catered for special 0/180 value */
+    if ( finalHeading == 0 ) {
+        /* Run until resume value is changed or obstacle hit */
+        while ( continueTurn == ON && ( encoder4_counts <= 10 || encoder2_counts <= 10 ) ) {                                  //REMOVED BUMP SENSOR FUNCTION
+            /* Check gps heading to update position */
+            while ( !gps_get_data() );
+            
+            /* Check if new value is acceptable with error */
+            if ( 179 - GPS_ERROR <= gps_heading ||
+                0 + GPS_ERROR >= gps_heading ) {
+                continueTurn = OFF;
+            }
+        }
+    }
+    /* Process for reaching a 90 degree heading */
+    else if ( finalHeading == 90 ) {
+        /* Run until resume value is changed or obstacle hit */
+        while ( continueTurn == ON && ( encoder4_counts <= 10 || encoder2_counts <= 10 ) ) {            //REMOVED BUMP SENSOR FUNCTION
+            /* Check gps heading to update position */
+            while ( !gps_get_data() );
+            
+            /* Check if new value is acceptable with error */
+            if ( finalHeading - GPS_ERROR <= gps_heading ||
+                finalHeading + GPS_ERROR >= gps_heading ) {
+                continueTurn = OFF;
+            }
+        }
+    }
+    
+    /* Stop all motor function */
+    Motor_Kill();
+    
+    /* Return 1 if successful */
+    beep();
+    beep();
+    return SUCCESS;
+    
+}
+
+void Victory_Spin()
+{
+    // Print victory message
+    printf("VICTORY!!!       RECYCLOPS!\n");
+    
+    while(!stop_button()){
+        // Start motor functions and commence victory screech
+        beep();
+        motor(LEFT_WHEEL, 50);
+        motor(RIGHT_WHEEL, -50);
+        sleep(2.0);
+        beep();
+        motor(LEFT_WHEEL, -50);
+        motor(RIGHT_WHEEL, 50);
+        sleep(2.0);
+    }
+    
+    // Stop motor functions
+    motor(LEFT_WHEEL, MOTOR_OFF);
+    motor(RIGHT_WHEEL, MOTOR_OFF);
+    
+}
+

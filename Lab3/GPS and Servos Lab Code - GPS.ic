@@ -1,0 +1,87 @@
+/* Team Members: Kelsey Dahman, Daniel Marchese   */
+/*               Ethan Weisgarber, Blake Williams */
+/* Date: 04/11/2012                               */
+/* Project: GPS and Servo Lab - GPS               */
+/* Instructor: BCM                                */
+#use exp_servo_lib.ic
+#use gps_module.icb
+#use gps_module.ic
+
+#define SERVOPORT 5
+
+int main ()
+{
+    /* Variable to hold previous heading value */
+    int previousHeading = 0;
+    
+    /* Test the servo motor and input calibration values */
+    exp_servo_enable();  // Activate servo motor
+    
+    exp_servo_min[SERVOPORT] = 80;    // Define minimum servo value
+    exp_servo_max[SERVOPORT] = 4050;   // Define maximum servo value
+    
+    /* Enable GPS */
+    gps_enable();
+    
+    /* Initialize the region of course using */
+    gps_initialize_knob();
+    
+    /* Only read new data */
+    while(!stop_button()) {
+        
+        /* Set servo to known position */
+        exp_servo_degree(SERVOPORT, 0);
+        
+        /* While loop */
+        while(!gps_get_data());
+        
+        /* Assign the gps value to variable */
+        previousHeading = gps_heading;
+        
+        /* Use selection to move servo in increments into 90 */
+        if ( gps_heading <= 90 ){
+            while( gps_heading != 90 ){
+                /* Loop to get the servo to align to even 10 degree*/
+                while ( ( 90 - previousHeading ) >= 10 ){
+                    previousHeading += 10;
+                    exp_servo_deg(SERVOPORT, ++previousHeading );
+                    sleep(1.0);
+                }
+                /* Increment by 1 until you reach 90 degrees */
+                exp_servo_deg( SERVOPORT, ++previousHeading );
+                sleep(0.5);
+            }
+        }
+        else
+        
+        
+        
+        
+        /*
+        if ( gps_heading > 90 ){
+            if ( gps_heading - 10 >= 90 ){
+                exp_servo_deg(SERVOPORT, gps_heading - 10);
+            }
+        }
+        else if ( gps_heading < 90 ){
+            if ( gps_heading + 10 <= 90 ){
+                exp_servo_deg(SERVOPORT, gps_heading + 10);
+            }
+            else if ( gps_heading == 90 ) {
+                printf("AT %d\n", gps_heading);
+            }
+        }
+        else {
+            printf("CLOSE ENOUGH");
+        }
+        
+        sleep(1.0);
+*/
+    }
+    
+    /* Disable servo motor */
+    exp_servo_disable();
+    
+    /* Disable GPS */
+    gps_disable();
+}

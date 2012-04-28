@@ -1,0 +1,94 @@
+/*********************************************/
+/* The Magic Conch                           */
+/* Team J-6                                  */
+/* Begin Date: 04/17/2012                    */
+/* End Date:                                 */
+/* Purpose: This program will be used in the */
+/* performance test on Friday 4-20           */
+/*********************************************/
+
+//Definitions for motor ports and motor speeds
+#define LEFT_WHEEL 3
+#define RIGHT_WHEEL 2
+#define MOTOR_POWER 90
+#define MOTOR_OFF 0
+
+void Turn_Ninety_CCW()
+{
+    // Start motor functions
+    motor(LEFT_WHEEL, MOTOR_POWER);
+    motor(RIGHT_WHEEL, -MOTOR_POWER);
+    sleep(0.47);
+    
+    // Stop motor functions
+    motor(LEFT_WHEEL, MOTOR_OFF);
+    motor(RIGHT_WHEEL, MOTOR_OFF);
+    sleep(0.50);
+
+}
+
+void Victory_Spin()
+{
+    // Print victory message
+    printf("VICTORY!!!       RECYCLOPS!\n");
+    
+    while(!stop_button()){
+        // Start motor functions and commence victory screech
+        beep();
+        motor(LEFT_WHEEL, 50);
+        motor(RIGHT_WHEEL, -50);
+        sleep(2.0);
+        beep();
+        motor(LEFT_WHEEL, -50);
+        motor(RIGHT_WHEEL, 50);
+        sleep(2.0);
+    }
+    
+    // Stop motor functions
+    motor(LEFT_WHEEL, MOTOR_OFF);
+    motor(RIGHT_WHEEL, MOTOR_OFF);
+
+}
+
+void Motor_Forward()
+{
+    // Start motor functions
+    motor(LEFT_WHEEL, MOTOR_POWER);
+    motor(RIGHT_WHEEL, MOTOR_POWER);
+    sleep(3.5);
+}
+
+
+void Motor_Backward()
+{
+    // Start motor functions
+    motor(LEFT_WHEEL, -MOTOR_POWER);
+    motor(RIGHT_WHEEL, -MOTOR_POWER);
+    sleep(3.5);    
+}
+
+int main ()
+{
+    // Press start or stop button to go forward
+    printf("START > FORWARD STOP > BACKWARD\n");
+    
+    while(!start_button() || !stop_button()) {
+        
+        if ( start_button() == 1 ) {
+            Motor_Forward();
+            
+        }
+        else if (stop_button() == 1 ) {
+            // Go Backwards with Spoon in Front
+            Motor_Backward();
+            
+            // Victory Dance
+            Victory_Spin();
+            
+        }
+        
+        // Stop motor functions
+        motor(LEFT_WHEEL, MOTOR_OFF);
+        motor(RIGHT_WHEEL, MOTOR_OFF);
+    }
+}

@@ -1,0 +1,21 @@
+/*************************/
+/* int main function for */
+/* pseudo code           */
+/*************************/
+
+int main () {
+	while (NOT CdS_ON_OFF_function());
+	traffic_light_function();
+	crank_function();
+	subway_function();
+	color = LED_Color_function();
+	
+	if (color == RED) {
+		Dumpster_Red_function();
+	}
+	
+	else {
+		Dumpster_Blue_function();
+	}
+	return 0;
+}

@@ -1,0 +1,38 @@
+/* Team Members: Kelsey Dahman, Daniel Marchese   */
+/*               Ethan Weisgarber, Blake Williams */
+/* Date: 03/30/2012                               */
+/* Project: Lab Sensor - Microswitch              */
+/* Instructor: BCM                                */
+#define MICROPORT 7 // Digital port constant
+#define MOTORPORT 1 // Motor port constant
+
+int main ()
+{
+    /* Stall handyboard until start button is pressed */
+    while(!start_button());
+    
+    /* Use while statement to check if the
+stop button has been pressed */
+    while( !stop_button() )
+      {
+        /* Check if microswitch is deactivated */
+        if ( digital(MICROPORT) == 0 )
+          {
+            /* Print statuses */
+            printf("MICROSWITCH OFF, MOTOR ON\n");
+            /* Begin motor run for first run, and continue */
+            motor(MOTORPORT, 100);
+            
+        }
+        /* Check if microswitch has been activated */
+        else if ( digital(MICROPORT) == 1 )
+          {
+            /* Print statuses */
+            printf("MICROSWITCH ON, MOTOR OFF\n");
+            motor(MOTORPORT, 0);
+        }
+    }         
+    /* Make sure motor turns off to end */
+    motor(MOTORPORT, 0);
+    printf("MOTOR OFF, TEST FINISHED");
+}

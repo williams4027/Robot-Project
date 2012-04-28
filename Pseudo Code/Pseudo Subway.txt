@@ -1,0 +1,10 @@
+/***********************/
+/* Subway Function for */
+/* Pseudo Code         */
+/***********************/
+
+void Subway_Button () {
+	Backup_Function (Distance, gpsx, gpsy);
+	Turn_45_Degrees_Function (CCW);
+	Drive_Straight_Bump_Function ();
+}

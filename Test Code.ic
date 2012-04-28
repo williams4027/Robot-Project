@@ -1,0 +1,13 @@
+int main ()
+{
+    while (!start_button());
+    motor (0, 25);
+    sleep (3.0);
+    motor (0, 50);
+    sleep (3.0);
+    motor (0, 75);
+    sleep (3.0);
+    motor (0, 100);
+    sleep (3.0);
+    motor (0, 0);
+}

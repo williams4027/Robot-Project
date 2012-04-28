@@ -1,0 +1,21 @@
+/* Team Members: Kelsey Dahman, Daniel Marchese   */
+/*               Ethan Weisgarber, Blake Williams */
+/* Date: 04/11/2012                               */
+/* Project: GPS and Servo Lab - Calibration       */
+/* Instructor: BCM                                */
+/* Author: Blake Williams                         */
+
+#use exp_servo_lib.ic
+#use exp_servo_calibrate.ic
+
+#define SERVOPORT 5
+
+int main ()
+{
+    // Enable servo
+    exp_servo_enable();
+    
+    // Run calibration function from servo library
+    exp_servo_calibrate(SERVOPORT);
+    
+}

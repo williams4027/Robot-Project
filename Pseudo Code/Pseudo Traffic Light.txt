@@ -1,0 +1,16 @@
+/**************************/
+/* Traffic light function */
+/* for pseudo code        */
+/**************************/
+
+void Traffic_Light() {
+	while (1) {
+		if (Pressure Switch is ON) {
+			Drive_Straight_Function(distance, gpsx, gpsy);
+			Raise_Forklift_Function();
+			break;
+		}
+		
+		else {}
+	}
+}

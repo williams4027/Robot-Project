@@ -1,0 +1,66 @@
+/*********************************************/
+/* The Magic Conch                           */
+/* Team J-6                                  */
+/* Begin Date: 04/17/2012                    */
+/* End Date:                                 */
+/* Purpose: This program will be used in the */
+/* performance test on Friday 4-20           */
+/*********************************************/
+
+//Definitions for motor ports and motor speeds
+#define LEFT_WHEEL 3
+#define RIGHT_WHEEL 2
+#define MOTOR_POWER 70
+#define MOTOR_FORWARD 1
+#define MOTOR_BACKWARD -1
+
+void Motor_Test( int motor_direction )
+{
+    // Initialize motor level, increment variable
+    int motor_level, increment;
+    
+    /* Assign either a decrement or increment to the motor and
+      initialize motor level that will be incremented for testing */
+    if ( motor_direction == 1 )
+      {
+        motor_level = 10;
+        increment = 10;
+    }
+    else if ( motor_direction == -1 )
+      {
+        motor_level = -10;
+        increment = -10;
+    }
+    
+    //Turn on both motors and let them run for 3 seconds.
+    while ( motor_level <= 100 && motor_level >= -100 ) {
+        // Print motor level to LCD
+        printf("MOTOR: %d\n", motor_level); 
+        
+        // Give motor power and sleep between
+        motor (LEFT_WHEEL, motor_level );
+        motor (RIGHT_WHEEL, motor_level );
+        sleep (3.0);
+        motor (LEFT_WHEEL, 0);
+        motor (RIGHT_WHEEL, 0);
+        sleep (3.0);
+        
+        // Increment motor level
+        motor_level += increment;
+        
+    }
+    
+    // Print finish message
+    printf("MOTOR TEST COMPLETE\n");
+    
+}
+
+int main ()
+{
+    // Wait for start button to start tests
+    while(!start_button());
+    
+    // Run motor test to check how wheels spin
+    Motor_Test(1);
+    Motor_Test(-1);
+}

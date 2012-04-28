@@ -1,0 +1,16 @@
+/**************************/
+/* Forklift Functions for */
+/* Pseudo Forklift        */
+/**************************/
+
+void Raise_Forklift () {
+	Forklift Servo up;
+	sleep(1.0);
+	Forklift Servo stop;
+}
+
+void Lower_Forklift () {
+	Forklift Servo down;
+	sleep(1.0);
+	Forklift Servo stop;
+}

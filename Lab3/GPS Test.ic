@@ -1,0 +1,28 @@
+/* Team Members: Kelsey Dahman, Daniel Marchese   */
+/*               Ethan Weisgarber, Blake Williams */
+/* Date: 04/11/2012                               */
+/* Project: GPS and Servo Lab - Test              */
+/* Instructor: BCM                                */
+/* Author: Blake Williams                         */
+
+#use gps_module.icb
+#use gps_module.ic
+
+int main ()
+{
+    //State the variables
+    int heading;
+    
+    //Initialize the GPS and course region
+    gps_enable();
+    gps_initialize_knob();
+    
+    //Create an infinite while loop
+    while (!stop_button())
+      {
+        while (!gps_get_data());
+        heading = gps_heading;
+        printf ("H:%d X:%d Y:%d\n", heading, gps_x, gps_y);
+        sleep (1.0);
+    }
+}

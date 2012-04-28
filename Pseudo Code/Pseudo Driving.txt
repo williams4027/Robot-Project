@@ -1,0 +1,67 @@
+/*************************/
+/* Driving functions for */
+/* Pseudo Code           */
+/*************************/
+
+void Drive_Straight (Distance, gpsx, gpsy) {
+	Distance ==> Clicks;  //Conversion will go here
+	
+	Left Motor Forward;
+	Right Motor Forward;
+	
+	while (encoder_count != Clicks) {
+		update encoder_count;
+	}
+	
+	Left Motor Kill;
+	Right Motor Kill;
+	
+	while (GPS not in acceptable range) {
+		Turn on motors as necessary;
+		sleep (0.25);
+	}
+	
+	beep();
+}
+
+
+void Back_Up (Distance, gpsx, gpsy) {
+	Distance ==> Clicks;  //Conversion will go here
+	
+	Left Motor Backward;
+	Right Motor Backward;
+	
+	while (encoder_count != Clicks) {
+		update encoder_count;
+	}
+	
+	Left Motor Kill;
+	Right Motor Kill;
+	
+	while (GPS not in acceptable range) {
+		Turn on motors as necessary;
+		sleep (0.25);
+	}
+	
+	beep();
+}
+
+void Short_Forward () {
+	Right Motor Forward;
+	Left Motor Forward;
+	
+	sleep(0.75);
+	
+	Right Motor Kill;
+	Left Motor Kill;
+}
+
+void Short_Backup () {
+	Right Motor Backward;
+	Left Motor Backward;
+	
+	sleep(0.75);
+	
+	Right Motor Kill;
+	Left Motor Kill;
+}

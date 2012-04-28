@@ -1,0 +1,35 @@
+
+/* Team Members: Kelsey Dahman, Daniel Marchese   */
+/*               Ethan Weisgarber, Blake Williams */
+/* Date: 04/02/2012                               */
+/* Project: Lab Sensor - Filter                   */
+/* Instructor: BCM                                */
+#define CDSPORT 6 // Analog port constant
+
+int main (){
+    /* Define variables */
+    int cds_reading = 0;
+    
+    /* Stall handyboard until start button is pressed */
+    while(!start_button());
+    
+    /* Use while statement to print the values read */
+    while( !stop_button() ){
+        
+        /* Save analog reading to variable cdsreading */
+        cds_reading = analog(CDSPORT);        
+        
+        /* Selection case to determine lights using green filter */
+        if ( cds_reading >= 0 && cds_reading <= 15 ){
+            printf("RED LIGHT %d\n", cds_reading);
+        }
+        else if ( cds_reading > 15 && cds_reading <= 180 ){
+            printf("BLUE LIGHT %d\n", cds_reading);
+        }
+        else if ( cds_reading > 180 && cds_reading <= 255 ){
+            printf("NO LIGHT %d\n", cds_reading);
+        }
+        /* Sleep timer to see reading values */
+        sleep(1.0);
+    }    
+}

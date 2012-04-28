@@ -1,0 +1,34 @@
+/*********************************************/
+/* The Magic Conch                           */
+/* Team J-6                                  */
+/* Begin Date: 04/21/2012                    */
+/* Purpose: This program will be used to     */
+/* develop motor commands for integration    */
+/*********************************************/
+// Files to include for proper functions
+#use sencdr4.icb
+#use sencdr2.icb
+
+int main () 
+{
+    encoder2_high_threshold = 150;
+    encoder4_high_threshold = 150;
+    
+    
+    while( !start_button() );
+    
+    motor(1, 40);
+    motor(3, 40);
+    
+    while ( encoder4_counts <= 160 && encoder2_counts <= 160 ){
+    printf("WL: %d  WR: %d\n", encoder4_counts, encoder2_counts );
+    
+    /*while( !stop_button() ) {
+        printf("WL: %d  WR: %d\n", encoder4_counts, encoder2_counts );       
+        //printf("WL: %d  WR: %d\n", analog(4), analog(2));
+    }*/
+    
+    }
+    motor(1, 0);
+    motor(3, 0);
+}

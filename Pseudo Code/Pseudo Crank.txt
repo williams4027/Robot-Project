@@ -1,0 +1,19 @@
+/**********************/
+/* Crank Function for */
+/* Pseudo Code        */
+/**********************/
+
+void Crank_Function () {
+	Back_Up_Function (Distance, gpsx, gpsy);
+	Turn_90_Degrees_Function (CW);
+	Drive_Straight_Function (Distance, gpsx, gpsy);
+	
+	for (count = 1; count <= 5; count++) {
+		Raise_Forklift_Function ();
+		Short_Backup_Function ();
+		Lower_Forklift_Function ();
+		Short_Forward_Function ();
+	}
+
+	Short_Backup_Function();
+}

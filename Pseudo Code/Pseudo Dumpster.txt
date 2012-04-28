@@ -1,0 +1,61 @@
+/**************************/
+/* Dumpster Functions for */
+/* Pseudo Code            */
+/**************************/
+
+void Dumpster_Red () {
+	Short_Forward_Function ();
+	Turn_90_Degrees_Function (CW);
+	Drive_Straight_Function (Distance, gpsx, gpsy);
+	Raise_Forklift_Function ();
+	Turn_180_Degrees_Function (CW);
+	Drive_Straight_Function (Distance, gpsx, gpsy);
+	Lower_Forklift_Function ();
+	Short_Backup_Function ();
+	Lower_Forklift_Function ();
+	Turn_90_Degrees_Function (CCW);
+	Drive_Straight_Function (Distance, gpsx, gpsy);
+	Turn_90_Degrees_Function (CCW);
+	Drive_Straight_Function (Distance, gpsx, gpsy);
+	Raise_Forklift_Function ();
+	Turn_180_Degrees_Function (CCW);
+	Drive_Straight_Function (Distance, gpsx, gpsy);
+	Turn_90_Degrees_Function (CW);
+	Drive_Straight_Function (Distance, gpsx, gpsy);
+	Turn_90_Degrees_Function (CCW);
+	Lower_Forklift_Function ();
+	Short_Backup_Function ();
+	Turn_90_Degrees_Function (CCW);
+	Drive_Straight_Function (Distance, gpsx, gpsy);
+	Turn_90_Degrees_Function (CCW);
+	Drive_Straight_Bump_Function ();
+	Victory_Spin_Function ();
+}
+
+
+void Dumpster_Blue () {
+	Short_Forward_Function ();
+	Turn_90_Degrees_Function (CW);
+	Drive_Straight_Function (Distance, gpsx, gpsy);
+	Raise_Forklift_Function ();
+	Turn_180_Degrees_Function (CW);
+	Drive_Straight_Function (Distance, gpsx, gpsy);
+	Turn_90_Degrees_Function (CCW);
+	Drive_Straight_Function (Distance, gpsx, gpsy);
+	Turn_90_Degrees_Function (CW);
+	Lower_Forklift_Function ();
+	Short_Backup_Function ();
+	Lower_Foklift_Function ();
+	Turn_180_Degrees_Function (CW);
+	Drive_Straight_Function (Distance, gpsx, gpsy);
+	Raise_Forklift_Function ();
+	Turn_180_Degrees_Function (CCW);
+	Drive_Straight_Function (Distance, gpsx, gpsy);
+	Lower_Forklift_Function ();
+	Short_Backup_Function ();
+	Turn_90_Degrees_Function (CW);
+	Drive_Straight_Function (Distance, gpsx, gpsy);
+	Turn_90_Degrees_Function (CW);
+	Drive_Straight_Bump_Function ();
+	Victory_Spin_Function ();
+}
