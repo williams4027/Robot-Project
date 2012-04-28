@@ -13,6 +13,8 @@
 #use gps_module.icb
 #use gps_module.ic
 
+/* Check to make sure commit and push work */
+
 /* Function will turn off the drive train motors */
 int Motor_Kill()
 {
@@ -142,8 +144,8 @@ int Motor_Straight( int motorDirection, int totalCounts, int finalHeading, int m
         }
         
     }
-   // /* Kill motor, because it looks like we've got a SITUATION! */
-   // Motor_Kill();
+    // /* Kill motor, because it looks like we've got a SITUATION! */
+    // Motor_Kill();
     
     /* Return value of test */
     return SUCCESS;
