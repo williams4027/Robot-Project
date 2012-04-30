@@ -6,43 +6,44 @@
 /* test motor commands before integration    */
 /*********************************************/
 // Files to include for proper functions
-#use Robot_Global_Constants_REV_1.ic
-#use Motor_Functions_REV_2.ic
-#use Sensor_Functions_REV_1.ic
+#use Robot_Global_Constants_REV_2.ic
+#use Motor_Functions_REV_4.ic
+#use Sensor_Functions_REV_2.ic
 
 int main()
 {
-    /* Adjusts the shaft encoder reading values */
-    encoder4_high_threshold = 150;
-    encoder2_high_threshold = 150;
-    
-    /* Tell the robot the correct gps values to get */
-    GPS_Initialize();
-    //GPS_Test();
+    /* Right Wheel 16.5-17 */
+    encoder2_high_threshold = 215;
+    encoder2_low_threshold = 195;
+    /* Left Wheel 16 */
+    encoder4_high_threshold = 40;
+    encoder4_low_threshold = 20;
     
     /* Begin with motors stopped */
     Motor_Kill();
     
+    /* */
+    motor(1, 30);
+    motor(3, 30);
+    sleep(.5);
+    Motor_Kill();
+    
+    /* Tell the robot the correct gps values to get and test them */
+    GPS_Initialize();
+    
+    /* Test the GPS to make sure it is correct */
+    GPS_Test();
+        
     /* Wait for the light to begin run */
     while( cds_on_off() == OFF );
     
-    /* Move robot forward a small distance */
-    Motor_Straight(BACKWARD, 34, 90, 70, 70, 0, 170 );
+    /* Get the robot to go up the hill */
+    Hill_Climb(45, BACKWARD, 80, 80, 0, 150 );
     
-    if ( gps_y > 170 ){
-        motor(LEFT_WHEEL, -10);
-        motor(RIGHT_WHEEL, -10);
-        while(!gps_get_data());
-    }
-    
-    /* Turn robot to the right (Backwards forward) */
+    /* Make a 90 degree turn toward the crank */
     Robot_Turn( TURN_CCW );
     
-    /* Move robot forward a small distance */
-    Motor_Straight(BACKWARD, 23, 0, 70, 70, -105, 0 );
-    
-    /* Move robot forward a small distance */
-    Motor_Straight(FORWARD, 66, 0, 70, 70, -105, 0 );
+    Robot_Turn( TURN_CCW );
     
     /* Stop the motors and end the run */
     Motor_Kill();
@@ -51,5 +52,4 @@ int main()
     while(!gps_get_data());
     printf("X: %d Y: %d H: %d  L:%d  R:%d\n", gps_x, gps_y, gps_heading, encoder4_counts, encoder2_counts);
     sleep(2.0);
-    
 }

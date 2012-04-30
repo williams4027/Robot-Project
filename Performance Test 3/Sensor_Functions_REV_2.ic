@@ -1,0 +1,206 @@
+/*********************************************/
+/* The Magic Conch                           */
+/* Team J-6                                  */
+/* Begin Date: 04/21/2012                    */
+/* Purpose: This program will be used to     */
+/* hold sensor functions                     */
+/*********************************************/
+// Files to include for proper functions
+#use Robot_Global_Constants_REV_2.ic
+#use gps_module.icb
+#use gps_module.ic
+
+//Definitions for motor ports and motor speeds
+#define LEFT_WHEEL 3
+#define RIGHT_WHEEL 1
+#define MOTOR_POWER_FULL 100
+#define MOTOR_POWER_CRUISE 75
+#define MOTOR_POWER_HALF 50
+#define MOTOR_POWER_QUARTER 25
+#define MOTOR_OFF 0
+#define GPS_ERROR 2
+#define BUMP_PORT 1
+#define ON 1
+#define OFF 0
+#define RED 1
+#define BLUE 2
+#define CDSPORT 6
+
+/* Function to initialize the gps settings */
+int GPS_Initialize()
+{
+    /* Enable GPS */
+    gps_enable();
+    
+    /* Initialize the region of course using knob */
+    gps_initialize_knob();
+    
+}
+
+void GPS_Test()
+{
+    /* Test GPS Values */
+    while ( !stop_button() ) {
+        while( !gps_get_data() );
+        printf("X: %d Y: %d H: %d\n", gps_x, gps_y, gps_heading);
+        sleep(0.75);
+    }
+}
+
+//---------------------------------------------------------------------------
+/* Function used to check whether the robot has crossed a plane on the course */
+int GPS_Plane_Test(int xPlaneValue, int yPlaneValue)
+{
+    /* Print status */
+    printf("GPS_PLANE_TEST STARTED\n");
+    
+    /* Recheck GPS value */
+    while(!gps_get_data());
+    
+    /* Select between comparing the X or Y plane */
+    if ( yPlaneValue == 0 ) {
+        /* Determine between X of negative and positive value */
+        if ( xPlaneValue > 0 && gps_x < xPlaneValue ||
+            xPlaneValue < 0 && gps_x > xPlaneValue ){
+            return FAILURE;
+        }
+        else if ( xPlaneValue > 0 && gps_x >= xPlaneValue ||
+            xPlaneValue < 0 && gps_x <= xPlaneValue ){
+            return SUCCESS;
+        }
+    }
+    else if ( xPlaneValue == 0 ) {
+        // Determine between X of negative and positive value
+        if ( gps_y < yPlaneValue ){
+            return FAILURE;
+        }
+        else if ( gps_y >= yPlaneValue ){
+            return SUCCESS;
+        }   
+    }
+    /* Allow case for GPS free testing */
+    else if ( yPlaneValue == 0 && xPlaneValue == 0 ) {
+        return SUCCESS;
+    }
+}
+
+//---------------------------------------------------------------------------
+/* Function used to check whether the robot has crossed a plane on the course */
+int GPS_Adjust_Robot(int desiredHeading, int motorPowerL, int motorPowerR, int motorDirection)
+{
+    /* Select between heading of special cases */
+    while(!gps_get_data());
+    if ( desiredHeading != 0 && !( gps_heading <= desiredHeading + GPS_ERROR 
+                                  && gps_heading >= desiredHeading - GPS_ERROR ) ){
+        /* Update GPS values */
+        while(!gps_get_data());
+        
+        /* Adjust motors to keep robot in a particular heading*/
+        if ( gps_heading < desiredHeading && motorDirection == FORWARD ||
+            gps_heading > desiredHeading && motorDirection == BACKWARD ) {
+            motor(LEFT_WHEEL, OFF );
+            motor(RIGHT_WHEEL, motorPowerR);
+            sleep(MOTOR_ADJUST_TIME);
+        }
+        else if ( gps_heading > desiredHeading && motorDirection == FORWARD ||
+                 gps_heading < desiredHeading && motorDirection == BACKWARD ) {
+            motor(RIGHT_WHEEL, OFF );
+            motor(LEFT_WHEEL, motorPowerL);
+            sleep(MOTOR_ADJUST_TIME);   
+        }   
+    }
+    else if ( desiredHeading == 0 && !( ( gps_heading >= 179 - GPS_ERROR && gps_heading <= 179 ) ||
+                                       ( gps_heading <= 0 + GPS_ERROR && gps_heading >= 0 ) ) ){
+        /* Update GPS values */
+        while(!gps_get_data());
+        
+        /* Decide whether robot is facing to larger or less than 0 */
+        if ( ( gps_heading >= 90 && motorDirection == FORWARD ) ||
+            ( gps_heading < 90 && motorDirection == BACKWARD ) ){
+            motor(LEFT_WHEEL, OFF );
+            motor(RIGHT_WHEEL, motorPowerR);
+            sleep(MOTOR_ADJUST_TIME);            
+        }
+        else if ( ( gps_heading < 90 && motorDirection == FORWARD ) ||
+                 ( gps_heading >= 90 && motorDirection == BACKWARD ) ){
+            motor(RIGHT_WHEEL, OFF );
+            motor(LEFT_WHEEL, motorPowerL);
+            sleep(MOTOR_ADJUST_TIME);            
+        }
+    }        
+    /* Allow case for GPS free testing with all 0 input */
+    else if ( desiredHeading == 0 && motorDirection == 0 ) {
+        return SUCCESS;
+    }
+    /* Resume initial motor speed */
+    motor(RIGHT_WHEEL, motorPowerR );
+    motor(LEFT_WHEEL, motorPowerL);
+    
+    /* Return success value if program reaches this point */
+    return SUCCESS;
+}
+
+//Bump switch, returns one if bump switch was pressed during the
+//program cylce
+int bump_switch () {
+    if (digital(BUMP_PORT) == 1) {
+        printf ("BUMP SWITCH TRIPPED\n");
+        return ON;
+    }
+    
+    else if (digital(BUMP_PORT) == 0) {
+        printf ("NO BUMP DETECTED\n");
+        return OFF;
+    }
+    
+    else {
+        printf ("ERROR!\n");
+        return OFF;
+    }
+}
+
+int cds_color_reading () {
+    /* Define variables */
+    int cds_reading = 0;
+    
+    /* Stall handyboard until start button is pressed */
+    while(!start_button());
+    
+    /* Use while statement to print the values read */
+    while( !stop_button() ){
+        
+        /* Save analog reading to variable cdsreading */
+        cds_reading = analog(CDSPORT);        
+        
+        /* Selection case to determine lights using green filter */
+        if ( cds_reading >= 0 && cds_reading <= 15 ){
+            printf("RED LIGHT\n", cds_reading);
+            return RED;
+        }
+        else if ( cds_reading > 15 && cds_reading <= 180 ){
+            printf("BLUE LIGHT %d\n", cds_reading);
+            return BLUE;
+        }
+        else if ( cds_reading > 180 && cds_reading <= 255 ){
+            printf("NO LIGHT %d\n", cds_reading);
+            return OFF;
+        }
+    }    
+}
+
+int cds_on_off () {
+    if (analog(CDSPORT) < 60) {
+        printf ("LIGHT ON\n");
+        return ON;
+    }
+    
+    else {
+        printf ("LIGHT OFF\n");
+        return OFF;
+    }
+}
+
+void CdS_Test() {
+    /* Simply print the cds reading to screen */
+    printf("%d\n", analog(CDSPORT) );
+}

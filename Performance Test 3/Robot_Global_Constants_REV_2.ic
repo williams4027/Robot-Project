@@ -19,12 +19,15 @@
 #define TURN_CCW -1
 #define TURN_CW 1
 #define FORWARD 1
-#define BACKWARD 0
+#define BACKWARD -1
 #define MOTOR_OFF 0
 #define GPS_ERROR 4
 #define SUCCESS 1
 #define FAILURE 0
 #define DISTANCE_CONVERSION 1.75
+#define ENCODER_COUNT_BUFFER 10
+#define MOTOR_SLOW 10
+#define MOTOR_ADJUST_TIME .05
 
 //Definitions for sensor operations
 #define BUMP_PORT 1

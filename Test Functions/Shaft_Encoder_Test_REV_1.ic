@@ -8,28 +8,215 @@
 // Files to include for proper functions
 #use sencdr4.icb
 #use sencdr2.icb
+#define COUNT_BUFFER 10
+#define MOTOR_SLOW 10
+#define FORWARD 1
+#define BACKWARD -1
+
 
 int counter = 0;
-int analogArrayLeft[600];
-int analogArrayRight[600];
+int motorLevel = 20;
+int motorLevelR = 30;
+int motorLevelL = 30;
+int leftHighReading = 0;
+int leftLowReading = 256;
+int rightHighReading = 0;
+int rightLowReading = 256;
+int motorDesignation;
+int tempEncoderGoal = 0;
+
+
+
+int ShaftEncoderDrive(int distanceInches, int motorPowerR, int motorPowerL, int motorDirection )
+{
+    printf("Motor L = %d     Motor R = %d\n", motorLevelL, motorLevelR);
+    tempEncoderGoal = ( distanceInches * 17 ) / 10;
+    motor(1, motorPowerR * motorDirection);
+    motor(3, motorPowerL * motorDirection);
+    
+    while ( encoder2_counts + COUNT_BUFFER <= tempEncoderGoal ||
+           encoder4_counts + COUNT_BUFFER <= tempEncoderGoal );
+    
+    motor(1, motorPowerR * motorDirection - MOTOR_SLOW * motorDirection );
+    motor(3, motorPowerL * motorDirection - MOTOR_SLOW * motorDirection );
+    
+    while ( !stop_button() ){
+        if ( encoder2_counts >= tempEncoderGoal ){
+            motor(1, 0);
+        }
+        if ( encoder4_counts >= tempEncoderGoal  ){
+            motor(3, 0);
+        }
+        printf("WR: %d WL: %d\n", encoder2_counts, encoder4_counts );
+    }
+    
+    encoder4_counts = 0;
+    encoder2_counts = 0;
+    sleep(5.0); 
+    
+}
+
+
 
 int main () 
 {
-    encoder4_high_threshold = 215;
+    /* Right Wheel 16.5-17 */
     encoder2_high_threshold = 215;
-    encoder4_low_threshold = 195;
     encoder2_low_threshold = 195;
+    /* Left Wheel 16 */
+    encoder4_high_threshold = 40;
+    encoder4_low_threshold = 20;
     
+    sleep(2.0);
     
-    while( !start_button() );
+    while(!stop_button()){
+        AnalogPrinter();
+    }
     
-    motor(1, 40);
-    motor(3, 40);
+    /*
+    ShaftEncoderDrive(48, motorLevelR, motorLevelL, FORWARD );
+    
+    ShaftEncoderDrive(12, motorLevelR, motorLevelL, BACKWARD );
+    
+    ShaftEncoderDrive(12, motorLevelR, motorLevelL, BACKWARD );
+    */
+}
+
+void MotorChange(){
     
     while( !stop_button() ) {
-        printf("WL: %d  WR: %d    WL: %d  WR: %d\n", encoder4_counts, encoder2_counts, analog(4), analog(2) );       
+        //motorDesignation = motorCalibrate(motorLevelR, motorLevelL);
+        
+        motor(1, motorLevelR);
+        motor(3, motorLevelL);
+        sleep(.6);
+        if( encoder2_counts > encoder4_counts ){
+            motorLevelL++;
+            if ( motorLevelL > motorLevelR + 3 || motorLevelL < motorLevelR - 3 ){
+                motor(1, 30);
+                motor(3, 28);
+            }
+            motor(3, motorLevelL);
+            printf("Motor L = %d     Motor R = %d\n", motorLevelL, motorLevelR);
+            sleep(.8);
+        }
+        else if ( encoder2_counts < encoder4_counts ){
+            motorLevelR++;
+            if ( motorLevelR > motorLevelL + 3 || motorLevelR < motorLevelL - 3 ){
+                motor(1, 30);
+                motor(3, 28);
+            }
+            motor(1, motorLevelR);
+            printf("Motor L = %d     Motor R = %d\n", motorLevelL, motorLevelR);
+            sleep(.8);
+            
+        }
+        else
+        {
+            printf("WR: %d WL: %d\n", encoder2_counts, encoder4_counts );
+            beep();
+            sleep(.5);
+        }
+        
+        motor(1, 0);
+        motor(3, 0);
+        
+        printf("WR: %d WL: %d\n", encoder2_counts, encoder4_counts );
+        encoder2_counts = 0;
+        encoder4_counts = 0;
+        
+        sleep(.5);
+        
+        
     }
+    
+    
+    printf("WR: %d WL: %d\n", encoder2_counts, encoder4_counts );
     
     motor(1, 0);
     motor(3, 0);
+    
+}
+
+void AnalogPrinter(){
+    while(!stop_button()){
+        printf("R: A:%d C:%d   L: A:%d C:%d \n", analog(2), encoder2_counts, analog(4), encoder4_counts );
+    }
+    
+}
+
+
+int analogArrayLeft[60];
+int analogArrayRight[60];
+int leftTotal = 0;
+int rightTotal = 0;
+int arrayLength = 30;
+
+int motorCalibrate (int motorLevelR, int motorLevelL ) {   
+    while( !stop_button() ){
+        printf("ML: %d  MR: %d\n", motorLevelL, motorLevelR);
+        sleep(.4);
+        motor(1, motorLevelR);
+        motor(3, motorLevelL);
+        
+        counter = 0;
+        while ( counter < arrayLength && !stop_button() ) {
+            sleep(1.0);
+            analogArrayRight[counter] = encoder2_counts;
+            analogArrayLeft[counter] = encoder4_counts;
+            counter++;
+            printf("WR: %d WL: %d\n", encoder2_counts, encoder4_counts );
+            encoder2_counts = 0;
+            encoder4_counts = 0;
+        }
+        
+        motor(1,0);
+        motor(3,0);
+        counter = 0;
+        
+        while( counter < arrayLength ){
+            rightTotal += analogArrayRight[counter];
+            leftTotal += analogArrayLeft[counter];
+            counter++;
+        }
+        
+        printf("AVL: %d AVR: %d\n", leftTotal / counter, rightTotal / counter);
+        sleep(2.0);
+        
+        if ( leftTotal > rightTotal ){
+            motorLevelR += 4;
+        }
+        else if ( rightTotal > leftTotal ){
+            motorLevelL += 4;
+        }
+        else { printf("SAME!!!!!!"); }
+        
+        counter = 0;
+        while( counter < arrayLength ){
+            analogArrayRight[counter] = 0;
+            analogArrayLeft[counter] = 0;
+            counter++;
+        }
+    }
+    
+    motor(1,0);
+    motor(3,0);
+}
+
+void OutlierFinder() {
+    if ( analog(4) > leftHighReading ){
+        leftHighReading = analog(4);   
+    }
+    if ( analog(4) < leftLowReading ){
+        leftLowReading = analog(4);
+    }
+    if ( analog(2) > rightHighReading ){
+        rightHighReading = analog(2);   
+    }
+    if ( analog(2) < rightLowReading ){
+        rightLowReading = analog(2);
+    }   
+    printf("R: H:%d L:%d   L: H:%d L:%d\n", rightHighReading, rightLowReading,
+           leftHighReading, leftLowReading);
+    sleep(2.0);
 }

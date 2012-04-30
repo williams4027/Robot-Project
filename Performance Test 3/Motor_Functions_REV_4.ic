@@ -8,13 +8,20 @@
 //Libraries to be used
 #use sencdr4.icb
 #use sencdr2.icb
-#use Robot_Global_Constants_REV_1.ic
-#use Sensor_Functions_REV_1.ic
+#use Robot_Global_Constants_REV_2.ic
+#use Sensor_Functions_REV_2.ic
 #use gps_module.icb
 #use gps_module.ic
 
-/* Check to make sure commit and push work */
+/* Variables that can be used by all motor commands */
+int resumeMotor = ON;    // Move_Straight and Drive_Straight functions
+int tempEncoderGoal = 0; // Move_Straight function
+int leftMotorStatus;     // Move_Straight function
+int rightMotorStatus;    // Move_Straight function
+int finalHeading = -1;   // Robot_Turn function
+int continueTurn = ON;   // Robot_Turn function
 
+//---------------------------------------------------------------------------
 /* Function will turn off the drive train motors */
 int Motor_Kill()
 {
@@ -32,10 +39,139 @@ int Motor_Kill()
     
 }
 
-/* Function will move robot in a straight line */
-int resumeMotor = ON;
+//---------------------------------------------------------------------------
+/* Function used to move robot in a straight line using shaft encoders */
+int Move_Straight(int distanceInches, int motorDirection, int motorPowerL, int motorPowerR, 
+                  int finalDestinationX, int finalDestinationY )
+{
+    /* Print program status for user */
+    printf("MOVE_STRAIGHT FUNCTION STARTED\n");
+    
+    /* Calculate the required shaft encoder values */
+    tempEncoderGoal = ( distanceInches * 17 ) / 10;
+    
+    /* Reset encoder values */
+    encoder4_counts = 0;
+    encoder2_counts = 0;
+    
+    /* Begin to move robot in direction specified at a desired speed */
+    motor(RIGHT_WHEEL, motorPowerR * motorDirection);
+    motor(LEFT_WHEEL, motorPowerL * motorDirection);
+    printf("MOTOR STARTED\n");
+    
+    /* Slow motor speed when the robot has crossed a plane on the course */
+    resumeMotor = ON;
+    while ( resumeMotor == ON ){
+        if ( GPS_Plane_Test(finalDestinationX, finalDestinationY) == SUCCESS ){
+            resumeMotor = OFF;
+        }
+    }    
+    printf("PLANE_TEST COMPLETED\n");
+    
+    /* Use GPS to keep heading straight while moving */
+    while ( encoder2_counts + ENCODER_COUNT_BUFFER <= tempEncoderGoal ||
+           encoder4_counts + ENCODER_COUNT_BUFFER <= tempEncoderGoal ) {
+        /* Call on GPS function to adjust robot orientation */
+        GPS_Adjust_Robot(finalHeading, motorPowerL, motorPowerR, motorDirection);    
+    }
+    printf("ENCODER CHECK COMPLETED\n");
+    
+    /* Slow down robot motor speed as destination is approached */
+    motor(RIGHT_WHEEL, motorPowerR * motorDirection - MOTOR_SLOW * motorDirection );
+    motor(LEFT_WHEEL, motorPowerL * motorDirection - MOTOR_SLOW * motorDirection );
+    printf("ROBOT SLOWED\n");
+    
+    /* Set motor status and cut motors when encoder value is reached on both wheels */
+    leftMotorStatus = ON;
+    rightMotorStatus = ON;
+    while ( !(leftMotorStatus == OFF && rightMotorStatus == OFF) ){
+        if ( encoder2_counts >= tempEncoderGoal ){
+            /* Turn off right wheel when goal is reached */
+            motor(RIGHT_WHEEL, OFF);
+            leftMotorStatus = OFF;
+        }
+        if ( encoder4_counts >= tempEncoderGoal  ){
+            /* Turn off left motor when goal is reached */
+            motor(LEFT_WHEEL, OFF);
+            leftMotorStatus = OFF;
+        }
+    }
+    
+    /* Reset shaft encoder values for next function */
+    encoder4_counts = 0;
+    encoder2_counts = 0;
+    
+    /* Return that the function has terminated */
+    return SUCCESS;
+}
 
-int Motor_Straight( int motorDirection, int totalCounts, int finalHeading, int motorLevelL, int motorLevelR, int finalDestinationX, int finalDestinationY )
+//---------------------------------------------------------------------------
+/* Function used to move robot in a straight line using shaft encoders */
+int Hill_Climb(int distanceInches, int motorDirection, int motorPowerL, int motorPowerR, 
+                  int finalDestinationX, int finalDestinationY )
+{
+    /* Print program status for user */
+    printf("MOVE_STRAIGHT FUNCTION STARTED\n");
+    
+    /* Calculate the required shafte encoder values */
+    tempEncoderGoal = ( distanceInches * 17 ) / 10;
+    
+    /* Begin to move robot in direction specified at a desired speed */
+    motor(RIGHT_WHEEL, motorPowerR * motorDirection);
+    motor(LEFT_WHEEL, motorPowerL * motorDirection);
+    printf("MOTOR STARTED\n");
+    
+    /* Slow motor speed when the robot has crossed a plane on the course */
+    resumeMotor = ON;
+    while ( resumeMotor == ON ){
+        if ( GPS_Plane_Test(finalDestinationX, finalDestinationY) == SUCCESS ){
+            resumeMotor = OFF;
+        }
+    }    
+    printf("PLANE_TEST COMPLETED\n");
+    
+    /* Use GPS to keep heading straight while moving */
+    while ( encoder2_counts + ENCODER_COUNT_BUFFER <= tempEncoderGoal ||
+           encoder4_counts + ENCODER_COUNT_BUFFER <= tempEncoderGoal );
+    printf("ENCODER CHECK COMPLETED\n");
+    
+    /* Slow down robot motor speed as destination is approached */
+    motor(RIGHT_WHEEL, motorPowerR * motorDirection - MOTOR_SLOW * motorDirection );
+    motor(LEFT_WHEEL, motorPowerL * motorDirection - MOTOR_SLOW * motorDirection );
+    printf("ROBOT SLOWED\n");
+    
+    /* Set motor status and cut motors when encoder value is reached on both wheels */
+    leftMotorStatus = ON;
+    rightMotorStatus = ON;
+    while ( !stop_button() && !(leftMotorStatus == OFF && rightMotorStatus == OFF) ){
+        if ( encoder2_counts >= tempEncoderGoal ){
+            /* Turn off right wheel when goal is reached */
+            motor(RIGHT_WHEEL, OFF);
+            leftMotorStatus = OFF;
+        }
+        if ( encoder4_counts >= tempEncoderGoal  ){
+            /* Turn off left motor when goal is reached */
+            motor(LEFT_WHEEL, OFF);
+            leftMotorStatus = OFF;
+        }
+        
+        /* Print status of shaft encoders */
+        printf("WR: %d WL: %d\n", encoder2_counts, encoder4_counts );
+    }
+    
+    /* Reset shaft encoder values for next function */
+    encoder4_counts = 0;
+    encoder2_counts = 0;
+    
+    /* Return that the function has terminated */
+    return SUCCESS;
+}
+
+//---------------------------------------------------------------------------
+/* Function will move robot in a straight line */
+int Motor_Straight( int motorDirection, int totalCounts, int finalHeading, 
+                   int motorLevelL, int motorLevelR, int finalDestinationX, 
+                   int finalDestinationY )
 {
     /* Kill motor to initialize process */
     Motor_Kill();
@@ -141,65 +277,17 @@ int Motor_Straight( int motorDirection, int totalCounts, int finalHeading, int m
                 motor(LEFT_WHEEL, -motorLevelL);
                 motor(RIGHT_WHEEL, -motorLevelR);
             }
-        }
-        
+        }     
     }
     // /* Kill motor, because it looks like we've got a SITUATION! */
-    // Motor_Kill();
-    
-    /* Return value of test */
-    return SUCCESS;
-}
-
-/* Function will move robot in a straight line up the hill */
-int Hill_Climb( int motorDirection, int totalCounts, int finalHeading, int motorLevelL, int motorLevelR, int finalDestinationX, int finalDestinationY )
-{
-    /* Kill motor to initialize process */
-    Motor_Kill();
-    
-    /* Reset encoder values */
-    encoder4_counts = 0;
-    encoder2_counts = 0;
-    
-    /* Print message to signal command start */
-    printf("Motor_Straight Started\n");
-    
-    /* Use selection statement to choose motor direction */
-    if ( motorDirection == FORWARD ) {
-        // Start motor functions
-        motor(LEFT_WHEEL, motorLevelL);
-        motor(RIGHT_WHEEL, motorLevelR);
-    }
-    else if ( motorDirection == BACKWARD ) {
-        // Start motor functions
-        motor(LEFT_WHEEL, -motorLevelL);
-        motor(RIGHT_WHEEL, -motorLevelR);
-    }
-    
-    /* Initialize operations to prepare for gps */
-    resumeMotor = ON;
-    
-    /* Monitor motor function by assessing shaft encoder and heading */
-    while( resumeMotor == ON && !stop_button()) {
-        printf("L:%d R:%d  H:%d\n", encoder4_counts, encoder2_counts, gps_heading);
-        // Check shaft encoder to make sure robot has not arrived at destination 
-        if ( encoder4_counts > totalCounts || encoder2_counts > totalCounts ) {
-            // Change motor resume for reaching objective
-            resumeMotor = OFF;
-        } 
-    }
-    /* Kill motor, because it looks like we've got a SITUATION! */
     Motor_Kill();
     
     /* Return value of test */
     return SUCCESS;
 }
 
+//---------------------------------------------------------------------------
 /* Function will turn robot 90 degrees in a passed direction */
-// Variables to be used in Robot_Turn function
-int finalHeading = -1; 
-int continueTurn = ON; 
-
 int Robot_Turn(int rotationDirection )
 {   
     /* Ensure that motors are killed before starting */
@@ -217,11 +305,11 @@ int Robot_Turn(int rotationDirection )
     
     /* Selection case to discover if final heading
        value needs to be adjusted for being out of bounds */
-    if ( gps_heading < 45 || gps_heading > 135 ) {
+    if ( gps_heading < 45 && gps_heading >= 0 || gps_heading > 135 && gps_heading <= 179 ) {
         // Set to a heading of 90
         finalHeading = 90;
     }
-    else {
+    else if ( gps_heading >= 45 && gps_heading <= 135 ){
         finalHeading = 0;
     }
     
@@ -246,7 +334,7 @@ int Robot_Turn(int rotationDirection )
     /* Process catered for special 0/180 value */
     if ( finalHeading == 0 ) {
         /* Run until resume value is changed or obstacle hit */
-        while ( continueTurn == ON && ( encoder4_counts <= 12 || encoder2_counts <= 12 ) ) {                                  //REMOVED BUMP SENSOR FUNCTION
+        while ( continueTurn == ON ) {
             /* Check gps heading to update position */
             while ( !gps_get_data() );
             
@@ -262,7 +350,7 @@ int Robot_Turn(int rotationDirection )
     /* Process for reaching a 90 degree heading */
     else if ( finalHeading == 90 ) {
         /* Run until resume value is changed or obstacle hit */
-        while ( continueTurn == ON && ( encoder4_counts <= 10 || encoder2_counts <= 10 ) ) {            //REMOVED BUMP SENSOR FUNCTION
+        while ( continueTurn == ON ) {
             /* Check gps heading to update position */
             while ( !gps_get_data() );
             
@@ -286,6 +374,7 @@ int Robot_Turn(int rotationDirection )
     
 }
 
+//---------------------------------------------------------------------------
 void Victory_Spin()
 {
     // Print victory message
